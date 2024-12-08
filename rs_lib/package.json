@@ -1,0 +1,15 @@
+{
+  "name": "plane_physics_support_rs_lib",
+  "type": "module",
+  "version": "0.1.0",
+  "files": [
+    "plane_physics_support_rs_lib_bg.wasm",
+    "plane_physics_support_rs_lib.js",
+    "plane_physics_support_rs_lib.d.ts"
+  ],
+  "main": "plane_physics_support_rs_lib.js",
+  "types": "plane_physics_support_rs_lib.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}
