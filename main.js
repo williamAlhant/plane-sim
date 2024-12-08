@@ -12,8 +12,8 @@ const scene = new THREE.Scene();
 const light = new THREE.AmbientLight(0xffffff);
 scene.add(light);
 const orthoCameraWidth = 15;
-const orthoCameraHeight = orthoCameraWidth * window.innerHeight / window.innerWidth;
-const camera = new THREE.OrthographicCamera( orthoCameraWidth / - 2, orthoCameraWidth / 2, orthoCameraHeight / 2, orthoCameraHeight / - 2, 0.1, 1000 );
+const initialOrthoCameraHeight = orthoCameraWidth * window.innerHeight / window.innerWidth;
+const camera = new THREE.OrthographicCamera( orthoCameraWidth / - 2, orthoCameraWidth / 2, initialOrthoCameraHeight / 2, initialOrthoCameraHeight / - 2, 0.1, 1000 );
 // const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
 camera.position.z = 5;
 
@@ -27,6 +27,7 @@ function onWindowResize(){
     camera.top = orthoCameraHeight / 2;
     camera.bottom = orthoCameraHeight / - 2;
     camera.updateProjectionMatrix();
+    positionRulers();
 }
 
 function makeRulerTexture() {
@@ -65,17 +66,22 @@ function rulerSetScroll(ruler, xi) {
 const bottomRulers = [makeRuler(10, 0.5, 10), makeRuler(10, 1, 1)];
 const sideRulers = [makeRuler(10, 0.5, 10), makeRuler(10, 1, 1)];
 
-bottomRulers.forEach((ruler, i) => {
-    ruler.position.set(camera.position.x, camera.position.y - orthoCameraHeight / 2 + ruler.width / 2, camera.position.z - 1 - i * 0.1);
-    // ruler.position.set(camera.position.x, camera.position.y, 0 - i * 0.1);
-    scene.add(ruler);
-});
+function positionRulers() {
+    const cameraHeight = camera.top - camera.bottom;
+    const cameraWidth = camera.right - camera.left;
+    bottomRulers.forEach((ruler, i) => {
+        ruler.position.set(camera.position.x, camera.position.y - cameraHeight / 2 + ruler.width / 2, camera.position.z - 1 - i * 0.1);
+        // ruler.position.set(camera.position.x, camera.position.y, 0 - i * 0.1);
+        scene.add(ruler);
+    });
 
-sideRulers.forEach((ruler, i) => {
-    ruler.setRotationFromMatrix(new THREE.Matrix4().makeRotationZ(Math.PI / 2));
-    ruler.position.set(camera.position.x + orthoCameraWidth / 2 - ruler.width / 2, camera.position.y, camera.position.z - 1 - i * 0.1);
-    scene.add(ruler);
-});
+    sideRulers.forEach((ruler, i) => {
+        ruler.setRotationFromMatrix(new THREE.Matrix4().makeRotationZ(Math.PI / 2));
+        ruler.position.set(camera.position.x + cameraWidth / 2 - ruler.width / 2, camera.position.y, camera.position.z - 1 - i * 0.1);
+        scene.add(ruler);
+    });
+}
+positionRulers();
 
 let resetFlag = false;
 let pauseFlag = false;
