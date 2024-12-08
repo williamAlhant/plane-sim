@@ -21,6 +21,12 @@ window.addEventListener( 'resize', onWindowResize, false );
 
 function onWindowResize(){
     renderer.setSize( window.innerWidth, window.innerHeight );
+    const orthoCameraHeight = orthoCameraWidth * window.innerHeight / window.innerWidth;
+    camera.left = orthoCameraWidth / - 2;
+    camera.right = orthoCameraWidth / 2;
+    camera.top = orthoCameraHeight / 2;
+    camera.bottom = orthoCameraHeight / - 2;
+    camera.updateProjectionMatrix();
 }
 
 function makeRulerTexture() {
