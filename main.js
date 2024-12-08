@@ -17,6 +17,12 @@ const camera = new THREE.OrthographicCamera( orthoCameraWidth / - 2, orthoCamera
 // const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
 camera.position.z = 5;
 
+window.addEventListener( 'resize', onWindowResize, false );
+
+function onWindowResize(){
+    renderer.setSize( window.innerWidth, window.innerHeight );
+}
+
 function makeRulerTexture() {
     const rulerTexture = new THREE.TextureLoader().load('ruler-tex.png');
     rulerTexture.magFilter = THREE.NearestFilter;
@@ -73,13 +79,17 @@ const controls = {
     pause: () => { pauseFlag = !pauseFlag; },
     v_x: 0.0,
     v_y: 0.0,
+    power: 100_000.0,
+    thrust_to_weight: 0.0
 };
 const gui = new GUI();
-gui.add(controls, 'elevator', -30, 30);
+gui.add(controls, 'elevator', -30, 10);
 gui.add(controls, 'reset');
 gui.add(controls, 'pause');
 gui.add(controls, 'v_x').disable().listen();
 gui.add(controls, 'v_y').disable().listen();
+gui.add(controls, 'power', 50_000.0, 300_000.0);
+gui.add(controls, 'thrust_to_weight').name('T/W').disable().listen();
 
 var plane;
 var pos_cg;
@@ -126,7 +136,7 @@ class SimState {
         this.alpha = obj.alpha || 0.2;
         this.d_alpha = obj.d_alpha || 0.0;
         this.e_deflection = obj.e_deflection || 0.0;
-        this.power_prop = obj.power_prop || 200_000.0;
+        this.power_prop = obj.power_prop || controls.power;
         // this.simDataIndex = 0;
     }
 
@@ -156,8 +166,10 @@ function calcTickUpdateUser(previousState) {
     const stateFromStepObj = step_model(previousState);
     const newState = new SimState(stateFromStepObj);
     newState.e_deflection = controls.elevator * Math.PI / 180;
+    newState.power_prop = controls.power;
     controls.v_x = newState.v_x;
     controls.v_y = newState.v_y;
+    controls.thrust_to_weight = stateFromStepObj.thrust_to_weight;
     return newState;
 }
 
@@ -190,7 +202,7 @@ function renderFrameUser(interpStartState, interpEndState, interpFactor) {
     const alpha = start.alpha + interpFactor * (end.alpha - start.alpha);
 
     const e_deflection = controls.elevator * Math.PI / 180;
-    const deflection_quat = new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().makeRotationX(e_deflection));
+    const deflection_quat = new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().makeRotationX(-e_deflection));
     elev.quaternion.copy(deflection_quat.multiply(elev_local_quat));
 
     plane.setRotationFromMatrix(new THREE.Matrix4().identity());
