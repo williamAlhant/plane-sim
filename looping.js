@@ -24,12 +24,12 @@ class StateQ {
         this.innerArray.push(newState);
     }
 
-    cyclePop(nowWCMs) {
+    cyclePop(startTimeMs) {
         if (this.innerArray.length < 3) {
             throw new Error("stateQ should have >=3 entries when cycling");
         }
         this.innerArray.shift();
-        this.startTimeMs = Math.max(nowWCMs, this.startTimeMs + tickMs);
+        this.startTimeMs = startTimeMs;
     }
 
     interpStart() { return this.innerArray[0]; }
@@ -85,7 +85,7 @@ function renderFrame(nowWCMs) {
             break;
         }
         console.debug("renderFrame: stateQ.cyclePop");
-        stateQ.cyclePop(nowWCMs);
+        stateQ.cyclePop(stateQ.startTimeMs + tickMs);
     }
 
     if (!(nowWCMs >= stateQ.startTimeMs)) {
